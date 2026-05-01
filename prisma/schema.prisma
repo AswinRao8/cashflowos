@@ -1,0 +1,162 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Business {
+  id         String    @id @default(uuid())
+  name       String
+  email      String
+  phone      String?
+  address    String?
+  logoUrl    String?   @map("logo_url")
+  currency   String    @default("USD")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  users      User[]
+  leads      Lead[]
+  quotes     Quote[]
+  invoices   Invoice[]
+  lineItems  LineItem[]
+  payments   Payment[]
+  reminders  Reminder[]
+
+  @@map("businesses")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  businessId   String   @map("business_id")
+  business     Business @relation(fields: [businessId], references: [id])
+  name         String
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  role         String   @default("MEMBER") // ADMIN, MEMBER
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Lead {
+  id         String   @id @default(uuid())
+  businessId String   @map("business_id")
+  business   Business @relation(fields: [businessId], references: [id])
+  firstName  String   @map("first_name")
+  lastName   String?  @map("last_name")
+  email      String?
+  phone      String?
+  status     String   @default("NEW") // NEW, CONTACTED, QUOTED, WON, LOST
+  notes      String?
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  quotes     Quote[]
+  invoices   Invoice[]
+
+  @@map("leads")
+}
+
+model Quote {
+  id            String   @id @default(uuid())
+  businessId    String   @map("business_id")
+  business      Business @relation(fields: [businessId], references: [id])
+  leadId        String?  @map("lead_id")
+  lead          Lead?    @relation(fields: [leadId], references: [id])
+  customerName  String   @map("customer_name")
+  customerEmail String?  @map("customer_email")
+  quoteNumber   String   @map("quote_number")
+  status        String   @default("DRAFT") // DRAFT, SENT, ACCEPTED, REJECTED, EXPIRED
+  issueDate     DateTime @map("issue_date")
+  expiryDate    DateTime? @map("expiry_date")
+  currency      String
+  totalAmount   Decimal  @map("total_amount")
+  taxAmount     Decimal  @map("tax_amount")
+  notes         String?
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  invoices      Invoice[]
+
+  @@map("quotes")
+}
+
+model Invoice {
+  id            String   @id @default(uuid())
+  businessId    String   @map("business_id")
+  business      Business @relation(fields: [businessId], references: [id])
+  quoteId       String?  @map("quote_id")
+  quote         Quote?   @relation(fields: [quoteId], references: [id])
+  leadId        String?  @map("lead_id")
+  lead          Lead?    @relation(fields: [leadId], references: [id])
+  customerName  String   @map("customer_name")
+  customerEmail String?  @map("customer_email")
+  invoiceNumber String   @map("invoice_number")
+  status        String   @default("DRAFT") // DRAFT, SENT, VIEWED, PAID, OVERDUE, VOID
+  issueDate     DateTime @map("issue_date")
+  dueDate       DateTime @map("due_date")
+  currency      String
+  totalAmount   Decimal  @map("total_amount")
+  taxAmount     Decimal  @map("tax_amount")
+  notes         String?
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  payments      Payment[]
+  reminders     Reminder[]
+
+  @@map("invoices")
+}
+
+model LineItem {
+  id          String   @id @default(uuid())
+  businessId  String   @map("business_id")
+  business    Business @relation(fields: [businessId], references: [id])
+  parentId    String   @map("parent_id")
+  parentType  String   @map("parent_type") // QUOTE, INVOICE
+  description String
+  quantity    Decimal
+  unitPrice   Decimal  @map("unit_price")
+  taxRate     Decimal  @map("tax_rate")
+  total       Decimal
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("line_items")
+}
+
+model Payment {
+  id            String   @id @default(uuid())
+  businessId    String   @map("business_id")
+  business      Business @relation(fields: [businessId], references: [id])
+  invoiceId     String   @map("invoice_id")
+  invoice       Invoice  @relation(fields: [invoiceId], references: [id])
+  amount        Decimal
+  paymentDate   DateTime @map("payment_date")
+  paymentMethod String   @map("payment_method") // CASH, BANK_TRANSFER, CARD, OTHER
+  reference     String?
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@map("payments")
+}
+
+model Reminder {
+  id           String    @id @default(uuid())
+  businessId   String    @map("business_id")
+  business     Business  @relation(fields: [businessId], references: [id])
+  invoiceId    String    @map("invoice_id")
+  invoice      Invoice   @relation(fields: [invoiceId], references: [id])
+  type         String    // BEFORE_DUE, AFTER_DUE
+  days         Int
+  status       String    @default("PENDING") // PENDING, SENT, FAILED
+  scheduledFor DateTime  @map("scheduled_for")
+  sentAt       DateTime? @map("sent_at")
+
+  @@map("reminders")
+}
