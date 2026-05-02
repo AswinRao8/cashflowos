@@ -236,7 +236,12 @@ export default function QuotesPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="currency">Currency</Label>
-                  <Select value={formData.currency} onValueChange={(v) => setFormData({ ...formData, currency: v })}>
+                  <Select
+  value={formData.currency}
+  onValueChange={(v) =>
+    setFormData({ ...formData, currency: v ?? "USD" })
+  }
+ >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
