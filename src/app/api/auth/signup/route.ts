@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     }
 
     // 2. Create business and user in a transaction
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: any) => {
       const business = await tx.business.create({
         data: {
           name: businessName,
