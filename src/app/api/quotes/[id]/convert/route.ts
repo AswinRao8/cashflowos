@@ -35,7 +35,7 @@ export async function POST(
     });
 
     // 2. Create invoice and copy line items in a transaction
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: any) => {
       // Update quote status to ACCEPTED
       await tx.quote.update({
         where: { id: quoteId },
