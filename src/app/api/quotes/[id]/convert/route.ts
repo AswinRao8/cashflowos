@@ -64,7 +64,7 @@ export async function POST(
       // Copy Line Items
       if (lineItems.length > 0) {
         await tx.lineItem.createMany({
-          data: lineItems.map((item) => ({
+          data: lineItems.map((item: any) => ({
             businessId,
             parentId: invoice.id,
             parentType: "INVOICE",
