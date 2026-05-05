@@ -52,7 +52,7 @@ export async function POST(req: Request) {
     }
     
     // Create invoice and line items in a transaction
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: any) => {
       const invoice = await tx.invoice.create({
         data: {
           businessId,
