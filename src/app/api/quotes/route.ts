@@ -50,7 +50,7 @@ export async function POST(req: Request) {
       );
     }
     
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: any) => {
       const quote = await tx.quote.create({
         data: {
           businessId,
